@@ -1,0 +1,525 @@
+﻿<Page
+    x:Class="SentimentML.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SentimentML"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sentimentv3="using:SentimentML.SentimentV3"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Name="PageRoot">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid 
+            Grid.ColumnSpan="3" 
+            Height="100" 
+            Background="Gray">
+            <TextBlock 
+                VerticalAlignment="Center"
+                Margin="48 0 0 0"
+                Foreground="White"
+                FontSize="40"
+                Text="Text Analytics API - Sentiment V3" />
+        </Grid>
+
+        <ScrollViewer 
+            HorizontalScrollMode="Auto"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollMode="Disabled"
+            IsHorizontalScrollChainingEnabled="False"
+            Grid.Row="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400" />
+                    <ColumnDefinition Width="400" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <!-- Input Panel -->
+                <Grid 
+                    Grid.Row="1"
+                    Padding="12"
+                    RowSpacing="12"
+                    BorderBrush="DarkGray"
+                    BorderThickness="0 0 1 0">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Spacing="12">
+                        <TextBlock 
+                            HorizontalAlignment="Center"
+                            Text="Request Builder"
+                            FontSize="18"
+                            TextDecorations="Underline" />
+
+                        <!-- Text input -->
+                        <TextBox 
+                            Name="DocumentInputTextBox"
+                            MaxHeight="100"
+                            AcceptsReturn="True"
+                            TextWrapping="Wrap"
+                            Text="{Binding DocumentText, Mode=TwoWay}"
+                            IsEnabled="{Binding IsInputEnabled}"
+                            Header="Document text" />
+
+                        <!-- Expanded input panel -->
+                        <StackPanel>
+                            <StackPanel 
+                                Name="ExpandedInput"
+                                Visibility="Collapsed"
+                                Spacing="12"
+                                Margin="0 0 0 12">
+                                <!-- LanguageCode input-->
+                                <TextBox
+                                    Header="Language code"
+                                    Text="{Binding LanguageCode, Mode=TwoWay}"
+                                    IsEnabled="{Binding IsInputEnabled}" />
+                                <!-- TextAnalyticsKey input-->
+                                <TextBox
+                                    Header="Text Analytics Key"
+                                    Text="{Binding TextAnalyticsKey, Mode=TwoWay}"
+                                    IsEnabled="{Binding IsInputEnabled}" />
+                                <!-- TextAnalyticsUrl input-->
+                                <TextBox
+                                    Header="Text Analytics Url"
+                                    Text="{Binding TextAnalyticsUrl, Mode=TwoWay}"
+                                    IsEnabled="{Binding IsInputEnabled}" />
+                            </StackPanel>
+
+                            <!-- Expand button -->
+                            <Button
+                                Name="ExpandInputButton"
+                                HorizontalAlignment="Center"
+                                Background="Transparent"
+                                IsEnabled="{Binding IsInputEnabled}"
+                                Command="{Binding ToggleExpandedInputCommand}">
+                                <Button.Content>
+                                    <Polyline 
+                                    StrokeThickness="2"
+                                    Stroke="DarkGray"
+                                    Points="0,0 24,12 48,0" />
+                                </Button.Content>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Input buttons -->
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Button 
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding AddDocumentCommand}"
+                                IsEnabled="{Binding IsInputEnabled}"
+                                Content="Add Document" />
+                            <Button 
+                                Grid.Column="1"
+                                IsEnabled="False"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding UploadDocumentCommand}"
+                                Content="Upload from File" />
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Input items -->
+                    <Grid 
+                        Grid.Row="1"
+                        BorderBrush="DarkGray" 
+                        BorderThickness="0 1 0 0">
+                        <TextBlock 
+                            Text="Add Documents for analysis"
+                            Foreground="DarkGray"
+                            HorizontalAlignment="Center"
+                            Margin="12"/>
+                        <ListView 
+                            IsItemClickEnabled="False"
+                            SelectionMode="None"
+                            ItemsSource="{Binding DocumentInputs}">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="MaxHeight" Value="100" />
+                                    <Setter Property="BorderThickness" Value="0 0 0 1" />
+                                    <Setter Property="BorderBrush" Value="DarkGray" />
+                                    <Setter Property="Background" Value="White" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="sentimentv3:TextAnalyticsInput">
+                                    <Grid 
+                                        ToolTipService.ToolTip="{Binding Text}"
+                                        ColumnSpacing="12" 
+                                        Padding="0 4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock 
+                                            VerticalAlignment="Center"
+                                            TextWrapping="Wrap"
+                                            TextTrimming="WordEllipsis"
+                                            Text="{Binding Text}" />
+                                        <Button 
+                                            Foreground="DarkGray"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Grid.Column="1"
+                                            Command="{Binding DataContext.RemoveDocumentCommand, ElementName=PageRoot}"
+                                            CommandParameter="{Binding}">
+                                            <Button.Content>
+                                                <SymbolIcon Symbol="Clear" />
+                                            </Button.Content>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+
+                    <!-- Action buttons -->
+                    <Grid Grid.Row="2" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="4*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            HorizontalAlignment="Stretch"
+                            IsEnabled="{Binding IsInputEnabled}"
+                            Command="{Binding SubmitInputCommand}"
+                            Content="Get Sentiment" />
+                        <Button
+                            Grid.Column="1"
+                            ToolTipService.ToolTip="Reset Request Builder"
+                            HorizontalAlignment="Stretch"
+                            IsEnabled="{Binding IsInputEnabled}"
+                            Command="{Binding ResetInputCommand}">
+                            <Button.Content>
+                                <SymbolIcon Symbol="Refresh" />
+                            </Button.Content>
+                        </Button>
+                        <Button
+                            Grid.Column="2"
+                            ToolTipService.ToolTip="Clear Request Output"
+                            HorizontalAlignment="Stretch"
+                            IsEnabled="{Binding IsInputEnabled}"
+                            Command="{Binding ClearOutputCommand}">
+                            <Button.Content>
+                                <SymbolIcon Symbol="Clear" />
+                            </Button.Content>
+                        </Button>
+                    </Grid>
+                </Grid>
+        
+                <!-- Output panel -->
+                <StackPanel
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Padding="12"
+                    Spacing="12"
+                    BorderThickness="0 0 1 0" 
+                    BorderBrush="DarkGray">
+
+                    <TextBlock 
+                        HorizontalAlignment="Center"
+                        Text="Request Output"
+                        FontSize="18"
+                        TextDecorations="Underline" />
+
+                    <TextBlock
+                        FontSize="18"
+                        TextDecorations="Underline"
+                        Text="Documents" />
+
+                    <Grid>
+                        <TextBlock 
+                            Text="Use the Request Builder analyse Documents"
+                            Foreground="DarkGray"
+                            HorizontalAlignment="Center" />
+                        <ListView
+                            ItemsSource="{Binding ResponseDocuments}"
+                            SelectedItem="{Binding SelectedDocument, Mode=TwoWay}">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="BorderThickness" Value="0 0 0 1" />
+                                    <Setter Property="BorderBrush" Value="DarkGray" />
+                                    <Setter Property="Background" Value="White" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="sentimentv3:DocumentSentiment">
+                                    <Grid ColumnSpacing="12" RowSpacing="4" Padding="0 4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock 
+                                            Text="Id:" />
+                                        <TextBlock 
+                                            Grid.Column="1" 
+                                            FontWeight="Light"
+                                            Text="{Binding Id}" />
+
+                                        <TextBlock 
+                                            Grid.Row="1"
+                                            Text="Sentiment:" />
+                                        <TextBlock 
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            FontWeight="Light"
+                                            Text="{Binding Sentiment}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+
+                    <TextBlock
+                        FontSize="18"
+                        TextDecorations="Underline"
+                        Text="Sentences" />
+                    <Grid>
+                        <TextBlock 
+                            Text="Select a Document to see Sentences"
+                            Foreground="DarkGray"
+                            HorizontalAlignment="Center" />
+                        <ListView
+                            ItemsSource="{Binding SelectedDocument.Sentences}"
+                            SelectedItem="{Binding SelectedSentence, Mode=TwoWay}">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="BorderThickness" Value="0 0 0 1" />
+                                    <Setter Property="BorderBrush" Value="DarkGray" />
+                                    <Setter Property="Background" Value="White" />
+                                    <Setter Property="MaxHeight" Value="100" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="sentimentv3:SentenceSentiment">
+                                    <Grid 
+                                        ToolTipService.ToolTip="{Binding OriginalText}"
+                                        ColumnSpacing="12" 
+                                        RowSpacing="4" 
+                                        Padding="0 4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock 
+                                            Grid.ColumnSpan="2" 
+                                            FontWeight="Light"
+                                            TextTrimming="WordEllipsis"
+                                            TextWrapping="Wrap"
+                                            Text="{Binding OriginalText}" />
+
+                                        <TextBlock 
+                                            Grid.Row="1"
+                                            Text="Sentiment:" />
+                                        <TextBlock 
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            FontWeight="Light"
+                                            Text="{Binding Sentiment}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Details panel-->
+                <StackPanel 
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    MinWidth="400"
+                    Spacing="12"
+                    Padding="12">
+
+                    <TextBlock 
+                        HorizontalAlignment="Center"
+                        Text="Output Details"
+                        FontSize="18"
+                        TextDecorations="Underline" />
+
+                    <StackPanel>
+                        <TextBlock 
+                            Text="Document Scores"
+                            FontSize="18"
+                            TextDecorations="Underline" />
+                        <Grid 
+                            Padding="12"
+                            ColumnSpacing="12"
+                            RowSpacing="4"
+                            BorderBrush="DarkGray"
+                            BorderThickness="0 0 0 1"
+                            DataContext="{Binding SelectedDocument}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Sentiment:" />
+                            <TextBlock 
+                                Grid.Column="1"
+                                FontWeight="Light"
+                                Text="{Binding Sentiment}" />
+                            
+                            <TextBlock 
+                                Grid.Row="1"
+                                Text="Positive:" />
+                            <TextBlock 
+                                Grid.Column="1"
+                                Grid.Row="1"
+                                FontWeight="Light"
+                                Text="{Binding DocumentScores.PositivePercent}" />
+
+                            <TextBlock 
+                                Grid.Row="2"
+                                Text="Neutral:" />
+                            <TextBlock 
+                                Grid.Column="2"
+                                Grid.Row="2"
+                                FontWeight="Light"
+                                Text="{Binding DocumentScores.NeutralPercent}" />
+
+                            <TextBlock
+                                Grid.Row="3"
+                                Text="Negative:" />
+                            <TextBlock 
+                                Grid.Column="1"
+                                Grid.Row="3"
+                                FontWeight="Light"
+                                Text="{Binding DocumentScores.NegativePercent}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock 
+                            Text="Sentence Metadata"
+                            FontSize="18"
+                            TextDecorations="Underline" />
+                        <Grid 
+                            Padding="12"
+                            ColumnSpacing="12"
+                            RowSpacing="4"
+                            BorderBrush="DarkGray"
+                            BorderThickness="0 0 0 1"
+                            DataContext="{Binding SelectedSentence}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock 
+                                Text="Text:" />
+                            <TextBlock 
+                                Grid.Column="1" 
+                                FontWeight="Light"
+                                MaxWidth="800"
+                                MaxHeight="400"
+                                HorizontalAlignment="Left"
+                                TextWrapping="Wrap"
+                                TextTrimming="WordEllipsis"
+                                Text="{Binding OriginalText}" />
+
+                            <TextBlock 
+                                Grid.Row="1"
+                                Text="Offset:" />
+                            <TextBlock 
+                                Grid.Row="1"
+                                Grid.Column="1" 
+                                FontWeight="Light"
+                                Text="{Binding Offset}" />
+
+                            <TextBlock 
+                                Grid.Row="2"
+                                Text="Length:" />
+                            <TextBlock 
+                                Grid.Row="2"
+                                Grid.Column="1" 
+                                FontWeight="Light"
+                                Text="{Binding Length}" />
+
+                            <TextBlock 
+                                Grid.Row="3"
+                                Text="Sentiment:" />
+                            <TextBlock 
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                FontWeight="Light"
+                                Text="{Binding Sentiment}" />
+
+                            <TextBlock 
+                                Grid.Row="4"
+                                Text="Positive:" />
+                            <TextBlock 
+                                Grid.Column="1"
+                                Grid.Row="4"
+                                FontWeight="Light"
+                                Text="{Binding SentenceScores.PositivePercent}" />
+
+                            <TextBlock 
+                                Grid.Row="5"
+                                Text="Neutral:" />
+                            <TextBlock 
+                                Grid.Column="2"
+                                Grid.Row="5"
+                                FontWeight="Light"
+                                Text="{Binding SentenceScores.NeutralPercent}" />
+
+                            <TextBlock
+                                Grid.Row="6"
+                                Text="Negative:" />
+                            <TextBlock 
+                                Grid.Column="1"
+                                Grid.Row="6"
+                                FontWeight="Light"
+                                Text="{Binding SentenceScores.NegativePercent}" />
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>
