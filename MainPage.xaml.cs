@@ -42,7 +42,7 @@ namespace SentimentML
 
                     if (_vm.IsRequestPanelExpanded)
                     {
-                        InputPanel.MaxWidth = 72;
+                        InputPanel.MaxWidth = 48;
                         HiddenPanel.Visibility = Visibility.Visible;
                         ToggleRequestPanelButton.RenderTransform = new RotateTransform()
                         {
