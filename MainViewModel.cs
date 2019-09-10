@@ -213,9 +213,32 @@ namespace SentimentML
             Clipboard.SetContent(dataPackage);
         }
 
-        private void UploadDocument()
+        private async void UploadDocument()
         {
-            // TODO: Show FilePicker and extract contents as text.
+            try
+            {
+                IsInputEnabled = false;
+
+                FileOpenPicker openPicker = new FileOpenPicker();
+                openPicker.ViewMode = PickerViewMode.List;
+                //openPicker.SuggestedStartLocation = PickerLocationId.Unspecified;
+                openPicker.FileTypeFilter.Add(".txt");
+
+                StorageFile file = await openPicker.PickSingleFileAsync();
+                if (file != null)
+                {
+                   _documentText = await FileIO.ReadTextAsync(file);
+                    AddDocument();
+                }
+            }
+            catch (Exception e)
+            {
+                HandleError(e);
+            }
+            finally
+            {
+                IsInputEnabled = true;
+            }
         }
 
         private void ToggleExpandedInput()
@@ -235,24 +258,35 @@ namespace SentimentML
 
         private async void SaveResponseContent()
         {
-            var savePicker = new FileSavePicker
+            try
             {
-                SuggestedStartLocation = PickerLocationId.Downloads,
-                SuggestedFileName = "sentiment",
-            };
-            savePicker.FileTypeChoices.Add("Plain Text", new List<string>() { ".json" });
-            StorageFile file = await savePicker.PickSaveFileAsync();
+                var savePicker = new FileSavePicker
+                {
+                    SuggestedStartLocation = PickerLocationId.Downloads,
+                    SuggestedFileName = "sentiment",
+                };
+                savePicker.FileTypeChoices.Add("Plain Text", new List<string>() { ".json" });
+                StorageFile file = await savePicker.PickSaveFileAsync();
 
-            if (file != null)
+                if (file != null)
+                {
+                    // Prevent updates to the remote version of the file until we finish making changes and call CompleteUpdatesAsync.
+                    CachedFileManager.DeferUpdates(file);// write to file
+
+                    await FileIO.WriteTextAsync(file, _responseContent);
+
+                    // Let Windows know that we're finished changing the file so the other app can update the remote version of the file.
+                    // Completing updates may require Windows to ask for user input.
+                    FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file);
+                }
+            }
+            catch (Exception e)
             {
-                // Prevent updates to the remote version of the file until we finish making changes and call CompleteUpdatesAsync.
-                CachedFileManager.DeferUpdates(file);// write to file
-
-                await FileIO.WriteTextAsync(file, _responseContent);
-
-                // Let Windows know that we're finished changing the file so the other app can update the remote version of the file.
-                // Completing updates may require Windows to ask for user input.
-                FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file);
+                HandleError(e);
+            }
+            finally
+            {
+                IsInputEnabled = true;
             }
         }
 
@@ -305,14 +339,7 @@ namespace SentimentML
             }
             catch(Exception e)
             {
-                var contentDialog = new ContentDialog()
-                {
-                    Title = "An error has occurred",
-                    Content = e.Message,
-                    CloseButtonText = "Ok"
-                };
-
-                await contentDialog.ShowAsync();
+                HandleError(e);
             }
             finally
             {
@@ -333,6 +360,18 @@ namespace SentimentML
                 field = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        private async void HandleError(Exception e)
+        {
+            var contentDialog = new ContentDialog()
+            {
+                Title = "An error has occurred",
+                Content = e.Message,
+                CloseButtonText = "Ok"
+            };
+
+            await contentDialog.ShowAsync();
         }
     }
 }

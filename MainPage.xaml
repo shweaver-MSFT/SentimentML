@@ -129,7 +129,6 @@
                             Content="Add Document" />
                         <Button 
                             Grid.Column="1"
-                            IsEnabled="False"
                             HorizontalAlignment="Stretch"
                             Command="{Binding UploadDocumentCommand}"
                             Content="Upload from File" />
@@ -476,6 +475,7 @@
                                 <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition />
+                                <RowDefinition />
                             </Grid.RowDefinitions>
 
                             <TextBlock 
@@ -543,6 +543,15 @@
                                 Grid.Row="6"
                                 FontWeight="Light"
                                 Text="{Binding SentenceScores.NegativePercent}" />
+
+                            <TextBlock
+                                Grid.Row="7"
+                                Text="Warnings:" />
+                            <ItemsControl 
+                                Grid.Column="1"
+                                Grid.Row="7"
+                                FontWeight="Light"
+                                ItemsSource="{Binding Warnings}" />
                         </Grid>
                     </StackPanel>
 
@@ -561,12 +570,14 @@
                         <Button
                             Grid.Column="1"
                             ToolTipService.ToolTip="Copy to Clipboard"
+                            IsEnabled="{Binding IsInputEnabled}"
                             Command="{Binding CopyResponseContentCommand}">
                             <SymbolIcon Symbol="Copy" />
                         </Button>
                         <Button
                             Grid.Column="2"
-                            ToolTipService.ToolTip="Save sentiment.json"
+                            ToolTipService.ToolTip="Save as sentiment.json"
+                            IsEnabled="{Binding IsInputEnabled}"
                             Command="{Binding SaveResponseContentCommand}">
                             <SymbolIcon Symbol="Save" />
                         </Button>
