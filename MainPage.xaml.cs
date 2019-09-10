@@ -29,18 +29,34 @@ namespace SentimentML
                             CenterX = ExpandInputButton.ActualWidth / 2,
                             CenterY = ExpandInputButton.ActualHeight / 2
                         };
-                        DocumentInputTextBox.TextWrapping = TextWrapping.Wrap;
-                        DocumentInputTextBox.MinHeight = 300;
                         ExpandedInput.Visibility = Visibility.Visible;
                     }
                     else
                     {
                         ExpandInputButton.RenderTransform = default;
-                        DocumentInputTextBox.TextWrapping = TextWrapping.NoWrap;
-                        DocumentInputTextBox.MinHeight = default;
                         ExpandedInput.Visibility = Visibility.Collapsed;
                     }
+                    break;
 
+                case nameof(_vm.IsRequestPanelExpanded):
+
+                    if (_vm.IsRequestPanelExpanded)
+                    {
+                        InputPanel.MaxWidth = 72;
+                        HiddenPanel.Visibility = Visibility.Visible;
+                        ToggleRequestPanelButton.RenderTransform = new RotateTransform()
+                        {
+                            Angle = 180,
+                            CenterX = ToggleRequestPanelButton.ActualWidth / 2,
+                            CenterY = ToggleRequestPanelButton.ActualHeight / 2
+                        };
+                    }
+                    else
+                    {
+                        InputPanel.MaxWidth = 400;
+                        HiddenPanel.Visibility = Visibility.Collapsed;
+                        ToggleRequestPanelButton.RenderTransform = default;
+                    }
                     break;
             }
         }

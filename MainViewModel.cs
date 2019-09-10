@@ -6,7 +6,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
+using Windows.Storage.Pickers;
+using Windows.Storage.Provider;
 using Windows.UI.Xaml.Controls;
 
 namespace SentimentML
@@ -17,10 +20,13 @@ namespace SentimentML
 
         public RelayCommand AddDocumentCommand { get; }
         public RelayCommand ClearOutputCommand { get; }
+        public RelayCommand CopyResponseContentCommand { get; }
         public RelayCommand<TextAnalyticsInput> RemoveDocumentCommand { get; }
         public RelayCommand ResetInputCommand { get; }
+        public RelayCommand SaveResponseContentCommand { get; }
         public RelayCommand SubmitInputCommand { get; }
         public RelayCommand ToggleExpandedInputCommand { get; }
+        public RelayCommand ToggleRequestPanelCommand { get; }
         public RelayCommand UploadDocumentCommand { get; }
 
         private ObservableCollection<TextAnalyticsInput> _documentInputs;
@@ -51,6 +57,13 @@ namespace SentimentML
             set => Set(ref _isInputExpanded, value);
         }
 
+        private bool _isRequestPanelExpanded;
+        public bool IsRequestPanelExpanded
+        {
+            get => _isRequestPanelExpanded;
+            set => Set(ref _isRequestPanelExpanded, value);
+        }
+
         private string _languageCode;
         public string LanguageCode
         {
@@ -77,6 +90,13 @@ namespace SentimentML
         {
             get => _responseErrors;
             set => Set(ref _responseErrors, value);
+        }
+
+        private string _responseContent;
+        public string ResponseContent
+        {
+            get => _responseContent;
+            set => Set(ref _responseContent, value);
         }
 
         private DocumentSentiment _selectedDocument;
@@ -111,10 +131,13 @@ namespace SentimentML
         {
             AddDocumentCommand = new RelayCommand(AddDocument);
             ClearOutputCommand = new RelayCommand(ClearOutput);
+            CopyResponseContentCommand = new RelayCommand(CopyResponseContent);
             RemoveDocumentCommand = new RelayCommand<TextAnalyticsInput>(RemoveDocument);
             ResetInputCommand = new RelayCommand(ResetInput);
+            SaveResponseContentCommand = new RelayCommand(SaveResponseContent);
             SubmitInputCommand = new RelayCommand(SubmitInput);
             ToggleExpandedInputCommand = new RelayCommand(ToggleExpandedInput);
+            ToggleRequestPanelCommand = new RelayCommand(ToggleRequestPanel);
             UploadDocumentCommand = new RelayCommand(UploadDocument);
 
             _documentInputs = new ObservableCollection<TextAnalyticsInput>();
@@ -122,6 +145,7 @@ namespace SentimentML
             _isInputEnabled = true;
             _isInputExpanded = false;
             _requestStatistics = null;
+            _responseContent = string.Empty;
             _responseDocuments = new ObservableCollection<DocumentSentiment>();
             _responseErrors = new ObservableCollection<ErrorRecord>();
             _selectedDocument = null;
@@ -153,10 +177,15 @@ namespace SentimentML
 
         private void AddDocument()
         {
+            if (string.IsNullOrWhiteSpace(_documentText))
+            {
+                return;
+            }
+
             var document = new TextAnalyticsInput()
             {
                 Id = Guid.NewGuid().ToString(),
-                Text = _documentText,
+                Text = _documentText.Trim(),
                 LanguageCode = _languageCode
             };
             DocumentInputs.Add(document);
@@ -169,8 +198,19 @@ namespace SentimentML
             SelectedDocument = null;
             SelectedSentence = null;
             RequestStatistics = null;
+            ResponseContent = string.Empty;
             ResponseDocuments.Clear();
             ResponseErrors.Clear();
+        }
+
+        private void CopyResponseContent()
+        {
+            DataPackage dataPackage = new DataPackage
+            {
+                RequestedOperation = DataPackageOperation.Copy
+            };
+            dataPackage.SetText(_responseContent);
+            Clipboard.SetContent(dataPackage);
         }
 
         private void UploadDocument()
@@ -183,9 +223,37 @@ namespace SentimentML
             IsInputExpanded = !_isInputExpanded;
         }
 
+        private void ToggleRequestPanel()
+        {
+            IsRequestPanelExpanded = !_isRequestPanelExpanded;
+        }
+
         private void RemoveDocument(TextAnalyticsInput document)
         {
             DocumentInputs.Remove(document);
+        }
+
+        private async void SaveResponseContent()
+        {
+            var savePicker = new FileSavePicker
+            {
+                SuggestedStartLocation = PickerLocationId.Downloads,
+                SuggestedFileName = "sentiment",
+            };
+            savePicker.FileTypeChoices.Add("Plain Text", new List<string>() { ".json" });
+            StorageFile file = await savePicker.PickSaveFileAsync();
+
+            if (file != null)
+            {
+                // Prevent updates to the remote version of the file until we finish making changes and call CompleteUpdatesAsync.
+                CachedFileManager.DeferUpdates(file);// write to file
+
+                await FileIO.WriteTextAsync(file, _responseContent);
+
+                // Let Windows know that we're finished changing the file so the other app can update the remote version of the file.
+                // Completing updates may require Windows to ask for user input.
+                FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file);
+            }
         }
 
         private async void SubmitInput()
@@ -233,6 +301,7 @@ namespace SentimentML
 
                 SelectedDocument = ResponseDocuments.First();
                 SelectedSentence = SelectedDocument.Sentences.First();
+                ResponseContent = response.ResponseContent.Replace(",", ",\n").Replace("{", "{\n").Replace("}", "\n}");
             }
             catch(Exception e)
             {

@@ -36,7 +36,10 @@ namespace SentimentML.SentimentV3
                     throw new Exception(responseContent);
                 }
 
-                return JsonConvert.DeserializeObject<SentimentV3Response>(responseContent, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+                var responseObj = JsonConvert.DeserializeObject<SentimentV3Response>(responseContent, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+                responseObj.ResponseContent = responseContent;
+
+                return responseObj;
             }
         }
     }

@@ -29,345 +29,372 @@
                 Text="Text Analytics API - Sentiment V3" />
         </Grid>
 
-        <ScrollViewer 
-            HorizontalScrollMode="Auto"
-            HorizontalScrollBarVisibility="Auto"
-            VerticalScrollMode="Disabled"
-            IsHorizontalScrollChainingEnabled="False"
-            Grid.Row="1">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="400" />
-                    <ColumnDefinition Width="400" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="400" />
+                <ColumnDefinition MinWidth="400" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <!-- Input Panel -->
+            <Grid 
+                Name="InputPanel"
+                Width="400"
+                Grid.Row="1"
+                Padding="12"
+                RowSpacing="12"
+                BorderBrush="DarkGray"
+                BorderThickness="0 0 1 0">
 
                 <Grid.RowDefinitions>
-                    <RowDefinition />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!-- Input Panel -->
-                <Grid 
-                    Grid.Row="1"
-                    Padding="12"
-                    RowSpacing="12"
-                    BorderBrush="DarkGray"
-                    BorderThickness="0 0 1 0">
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Spacing="12">
-                        <TextBlock 
-                            HorizontalAlignment="Center"
-                            Text="Request Builder"
-                            FontSize="18"
-                            TextDecorations="Underline" />
-
-                        <!-- Text input -->
-                        <TextBox 
-                            Name="DocumentInputTextBox"
-                            MaxHeight="100"
-                            AcceptsReturn="True"
-                            TextWrapping="Wrap"
-                            Text="{Binding DocumentText, Mode=TwoWay}"
-                            IsEnabled="{Binding IsInputEnabled}"
-                            Header="Document text" />
-
-                        <!-- Expanded input panel -->
-                        <StackPanel>
-                            <StackPanel 
-                                Name="ExpandedInput"
-                                Visibility="Collapsed"
-                                Spacing="12"
-                                Margin="0 0 0 12">
-                                <!-- LanguageCode input-->
-                                <TextBox
-                                    Header="Language code"
-                                    Text="{Binding LanguageCode, Mode=TwoWay}"
-                                    IsEnabled="{Binding IsInputEnabled}" />
-                                <!-- TextAnalyticsKey input-->
-                                <TextBox
-                                    Header="Text Analytics Key"
-                                    Text="{Binding TextAnalyticsKey, Mode=TwoWay}"
-                                    IsEnabled="{Binding IsInputEnabled}" />
-                                <!-- TextAnalyticsUrl input-->
-                                <TextBox
-                                    Header="Text Analytics Url"
-                                    Text="{Binding TextAnalyticsUrl, Mode=TwoWay}"
-                                    IsEnabled="{Binding IsInputEnabled}" />
-                            </StackPanel>
-
-                            <!-- Expand button -->
-                            <Button
-                                Name="ExpandInputButton"
-                                HorizontalAlignment="Center"
-                                Background="Transparent"
-                                IsEnabled="{Binding IsInputEnabled}"
-                                Command="{Binding ToggleExpandedInputCommand}">
-                                <Button.Content>
-                                    <Polyline 
-                                    StrokeThickness="2"
-                                    Stroke="DarkGray"
-                                    Points="0,0 24,12 48,0" />
-                                </Button.Content>
-                            </Button>
-                        </StackPanel>
-
-                        <!-- Input buttons -->
-                        <Grid ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Button 
-                                HorizontalAlignment="Stretch"
-                                Command="{Binding AddDocumentCommand}"
-                                IsEnabled="{Binding IsInputEnabled}"
-                                Content="Add Document" />
-                            <Button 
-                                Grid.Column="1"
-                                IsEnabled="False"
-                                HorizontalAlignment="Stretch"
-                                Command="{Binding UploadDocumentCommand}"
-                                Content="Upload from File" />
-                        </Grid>
-                    </StackPanel>
-
-                    <!-- Input items -->
-                    <Grid 
-                        Grid.Row="1"
-                        BorderBrush="DarkGray" 
-                        BorderThickness="0 1 0 0">
-                        <TextBlock 
-                            Text="Add Documents for analysis"
-                            Foreground="DarkGray"
-                            HorizontalAlignment="Center"
-                            Margin="12"/>
-                        <ListView 
-                            IsItemClickEnabled="False"
-                            SelectionMode="None"
-                            ItemsSource="{Binding DocumentInputs}">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                    <Setter Property="MaxHeight" Value="100" />
-                                    <Setter Property="BorderThickness" Value="0 0 0 1" />
-                                    <Setter Property="BorderBrush" Value="DarkGray" />
-                                    <Setter Property="Background" Value="White" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="sentimentv3:TextAnalyticsInput">
-                                    <Grid 
-                                        ToolTipService.ToolTip="{Binding Text}"
-                                        ColumnSpacing="12" 
-                                        Padding="0 4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock 
-                                            VerticalAlignment="Center"
-                                            TextWrapping="Wrap"
-                                            TextTrimming="WordEllipsis"
-                                            Text="{Binding Text}" />
-                                        <Button 
-                                            Foreground="DarkGray"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            Grid.Column="1"
-                                            Command="{Binding DataContext.RemoveDocumentCommand, ElementName=PageRoot}"
-                                            CommandParameter="{Binding}">
-                                            <Button.Content>
-                                                <SymbolIcon Symbol="Clear" />
-                                            </Button.Content>
-                                        </Button>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </Grid>
-
-                    <!-- Action buttons -->
-                    <Grid Grid.Row="2" ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Button
-                            HorizontalAlignment="Stretch"
-                            IsEnabled="{Binding IsInputEnabled}"
-                            Command="{Binding SubmitInputCommand}"
-                            Content="Get Sentiment" />
-                        <Button
-                            Grid.Column="1"
-                            ToolTipService.ToolTip="Reset Request Builder"
-                            HorizontalAlignment="Stretch"
-                            IsEnabled="{Binding IsInputEnabled}"
-                            Command="{Binding ResetInputCommand}">
-                            <Button.Content>
-                                <SymbolIcon Symbol="Refresh" />
-                            </Button.Content>
-                        </Button>
-                        <Button
-                            Grid.Column="2"
-                            ToolTipService.ToolTip="Clear Request Output"
-                            HorizontalAlignment="Stretch"
-                            IsEnabled="{Binding IsInputEnabled}"
-                            Command="{Binding ClearOutputCommand}">
-                            <Button.Content>
-                                <SymbolIcon Symbol="Clear" />
-                            </Button.Content>
-                        </Button>
-                    </Grid>
-                </Grid>
-        
-                <!-- Output panel -->
-                <StackPanel
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Padding="12"
-                    Spacing="12"
-                    BorderThickness="0 0 1 0" 
-                    BorderBrush="DarkGray">
+                <StackPanel Spacing="12">
 
                     <TextBlock 
                         HorizontalAlignment="Center"
-                        Text="Request Output"
+                        Text="Request Builder"
                         FontSize="18"
                         TextDecorations="Underline" />
+                    
+                    <!-- Text input -->
+                    <TextBox 
+                        Name="DocumentInputTextBox"
+                        MaxHeight="100"
+                        AcceptsReturn="True"
+                        TextWrapping="Wrap"
+                        Text="{Binding DocumentText, Mode=TwoWay}"
+                        IsEnabled="{Binding IsInputEnabled}"
+                        Header="Document text" />
 
-                    <TextBlock
-                        FontSize="18"
-                        TextDecorations="Underline"
-                        Text="Documents" />
+                    <!-- Expanded input panel -->
+                    <StackPanel>
+                        <!-- Expand button -->
+                        <Button
+                            Name="ExpandInputButton"
+                            HorizontalAlignment="Center"
+                            Background="Transparent"
+                            IsEnabled="{Binding IsInputEnabled}"
+                            Command="{Binding ToggleExpandedInputCommand}">
+                            <Button.Content>
+                                <Polyline 
+                                StrokeThickness="2"
+                                Stroke="DarkGray"
+                                Points="0,0 24,12 48,0" />
+                            </Button.Content>
+                        </Button>
+                        
+                        <StackPanel 
+                            Name="ExpandedInput"
+                            Visibility="Collapsed"
+                            Spacing="12"
+                            Margin="0 0 0 12">
+                            <!-- LanguageCode input-->
+                            <TextBox
+                                Header="Language code"
+                                Text="{Binding LanguageCode, Mode=TwoWay}"
+                                IsEnabled="{Binding IsInputEnabled}" />
+                            <!-- TextAnalyticsKey input-->
+                            <TextBox
+                                Header="Text Analytics Key"
+                                Text="{Binding TextAnalyticsKey, Mode=TwoWay}"
+                                IsEnabled="{Binding IsInputEnabled}" />
+                            <!-- TextAnalyticsUrl input-->
+                            <TextBox
+                                Header="Text Analytics Url"
+                                Text="{Binding TextAnalyticsUrl, Mode=TwoWay}"
+                                IsEnabled="{Binding IsInputEnabled}" />
+                        </StackPanel>
 
-                    <Grid>
-                        <TextBlock 
-                            Text="Use the Request Builder analyse Documents"
-                            Foreground="DarkGray"
-                            HorizontalAlignment="Center" />
-                        <ListView
-                            ItemsSource="{Binding ResponseDocuments}"
-                            SelectedItem="{Binding SelectedDocument, Mode=TwoWay}">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="BorderThickness" Value="0 0 0 1" />
-                                    <Setter Property="BorderBrush" Value="DarkGray" />
-                                    <Setter Property="Background" Value="White" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="sentimentv3:DocumentSentiment">
-                                    <Grid ColumnSpacing="12" RowSpacing="4" Padding="0 4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition />
-                                            <RowDefinition />
-                                        </Grid.RowDefinitions>
+                        
+                    </StackPanel>
 
-                                        <TextBlock 
-                                            Text="Id:" />
-                                        <TextBlock 
-                                            Grid.Column="1" 
-                                            FontWeight="Light"
-                                            Text="{Binding Id}" />
-
-                                        <TextBlock 
-                                            Grid.Row="1"
-                                            Text="Sentiment:" />
-                                        <TextBlock 
-                                            Grid.Row="1"
-                                            Grid.Column="1"
-                                            FontWeight="Light"
-                                            Text="{Binding Sentiment}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </Grid>
-
-                    <TextBlock
-                        FontSize="18"
-                        TextDecorations="Underline"
-                        Text="Sentences" />
-                    <Grid>
-                        <TextBlock 
-                            Text="Select a Document to see Sentences"
-                            Foreground="DarkGray"
-                            HorizontalAlignment="Center" />
-                        <ListView
-                            ItemsSource="{Binding SelectedDocument.Sentences}"
-                            SelectedItem="{Binding SelectedSentence, Mode=TwoWay}">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="BorderThickness" Value="0 0 0 1" />
-                                    <Setter Property="BorderBrush" Value="DarkGray" />
-                                    <Setter Property="Background" Value="White" />
-                                    <Setter Property="MaxHeight" Value="100" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="sentimentv3:SentenceSentiment">
-                                    <Grid 
-                                        ToolTipService.ToolTip="{Binding OriginalText}"
-                                        ColumnSpacing="12" 
-                                        RowSpacing="4" 
-                                        Padding="0 4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition />
-                                            <RowDefinition />
-                                        </Grid.RowDefinitions>
-
-                                        <TextBlock 
-                                            Grid.ColumnSpan="2" 
-                                            FontWeight="Light"
-                                            TextTrimming="WordEllipsis"
-                                            TextWrapping="Wrap"
-                                            Text="{Binding OriginalText}" />
-
-                                        <TextBlock 
-                                            Grid.Row="1"
-                                            Text="Sentiment:" />
-                                        <TextBlock 
-                                            Grid.Row="1"
-                                            Grid.Column="1"
-                                            FontWeight="Light"
-                                            Text="{Binding Sentiment}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
+                    <!-- Input buttons -->
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Button 
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding AddDocumentCommand}"
+                            IsEnabled="{Binding IsInputEnabled}"
+                            Content="Add Document" />
+                        <Button 
+                            Grid.Column="1"
+                            IsEnabled="False"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding UploadDocumentCommand}"
+                            Content="Upload from File" />
                     </Grid>
                 </StackPanel>
 
-                <!-- Details panel-->
-                <StackPanel 
+                <!-- Input items -->
+                <Grid 
                     Grid.Row="1"
-                    Grid.Column="2"
-                    MinWidth="400"
-                    Spacing="12"
-                    Padding="12">
+                    BorderBrush="DarkGray" 
+                    BorderThickness="0 1 0 0">
+                    <TextBlock 
+                        Text="Add Documents for analysis"
+                        Foreground="DarkGray"
+                        HorizontalAlignment="Center"
+                        Margin="12"/>
+                    <ListView 
+                        IsItemClickEnabled="False"
+                        SelectionMode="None"
+                        ItemsSource="{Binding DocumentInputs}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="MaxHeight" Value="100" />
+                                <Setter Property="BorderThickness" Value="0 0 0 1" />
+                                <Setter Property="BorderBrush" Value="DarkGray" />
+                                <Setter Property="Background" Value="White" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="sentimentv3:TextAnalyticsInput">
+                                <Grid 
+                                    ToolTipService.ToolTip="{Binding Text}"
+                                    ColumnSpacing="12" 
+                                    Padding="0 4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock 
+                                        VerticalAlignment="Center"
+                                        TextWrapping="Wrap"
+                                        TextTrimming="WordEllipsis"
+                                        Text="{Binding Text}" />
+                                    <Button 
+                                        Foreground="DarkGray"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Grid.Column="1"
+                                        Command="{Binding DataContext.RemoveDocumentCommand, ElementName=PageRoot}"
+                                        CommandParameter="{Binding}">
+                                        <Button.Content>
+                                            <SymbolIcon Symbol="Clear" />
+                                        </Button.Content>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
 
+                <!-- Action buttons -->
+                <Grid Grid.Row="2" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        HorizontalAlignment="Stretch"
+                        IsEnabled="{Binding IsInputEnabled}"
+                        Command="{Binding SubmitInputCommand}"
+                        Content="Get Sentiment" />
+                    <Button
+                        Grid.Column="1"
+                        ToolTipService.ToolTip="Reset Request Builder"
+                        HorizontalAlignment="Stretch"
+                        IsEnabled="{Binding IsInputEnabled}"
+                        Command="{Binding ResetInputCommand}">
+                        <Button.Content>
+                            <SymbolIcon Symbol="Refresh" />
+                        </Button.Content>
+                    </Button>
+                    <Button
+                        Grid.Column="2"
+                        ToolTipService.ToolTip="Clear Request Output"
+                        HorizontalAlignment="Stretch"
+                        IsEnabled="{Binding IsInputEnabled}"
+                        Command="{Binding ClearOutputCommand}">
+                        <Button.Content>
+                            <SymbolIcon Symbol="Clear" />
+                        </Button.Content>
+                    </Button>
+                </Grid>
+
+                <Rectangle 
+                    Name="HiddenPanel"
+                    Visibility="Collapsed"
+                    Grid.RowSpan="3" 
+                    Fill="White" />
+
+                <Button
+                    Name="ToggleRequestPanelButton"
+                    Grid.RowSpan="3" 
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Right"
+                    Command="{Binding ToggleRequestPanelCommand}">
+                    <SymbolIcon Symbol="ClosePane" />
+                </Button>
+            </Grid>
+
+            <!-- Output panel -->
+            <Grid
+                Grid.Row="1"
+                Grid.Column="1"
+                Padding="12"
+                RowSpacing="12"
+                BorderThickness="0 0 1 0" 
+                BorderBrush="DarkGray">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock 
+                    HorizontalAlignment="Center"
+                    Text="Response Output"
+                    FontSize="18"
+                    TextDecorations="Underline" />
+
+                <TextBlock
+                    Grid.Row="1"
+                    FontSize="18"
+                    TextDecorations="Underline"
+                    Text="Documents" />
+                <Grid Grid.Row="2">
+                    <TextBlock 
+                        Text="Use the Request Builder analyse Documents"
+                        Foreground="DarkGray"
+                        HorizontalAlignment="Center" />
+                    <ListView
+                        ItemsSource="{Binding ResponseDocuments}"
+                        SelectedItem="{Binding SelectedDocument, Mode=TwoWay}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="BorderThickness" Value="0 0 0 1" />
+                                <Setter Property="BorderBrush" Value="DarkGray" />
+                                <Setter Property="Background" Value="White" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="sentimentv3:DocumentSentiment">
+                                <Grid ColumnSpacing="12" RowSpacing="4" Padding="0 4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock 
+                                        Text="Id:" />
+                                    <TextBlock 
+                                        Grid.Column="1" 
+                                        FontWeight="Light"
+                                        Text="{Binding Id}" />
+
+                                    <TextBlock 
+                                        Grid.Row="1"
+                                        Text="Sentiment:" />
+                                    <TextBlock 
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        FontWeight="Light"
+                                        Text="{Binding Sentiment}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+
+                <TextBlock
+                    Grid.Row="3"
+                    FontSize="18"
+                    TextDecorations="Underline"
+                    Text="Sentences" />
+                <Grid Grid.Row="4">
+                    <TextBlock 
+                        Text="Select a Document to see Sentences"
+                        Foreground="DarkGray"
+                        HorizontalAlignment="Center" />
+                    <ListView
+                        ItemsSource="{Binding SelectedDocument.Sentences}"
+                        SelectedItem="{Binding SelectedSentence, Mode=TwoWay}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="BorderThickness" Value="0 0 0 1" />
+                                <Setter Property="BorderBrush" Value="DarkGray" />
+                                <Setter Property="Background" Value="White" />
+                                <Setter Property="MaxHeight" Value="100" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="sentimentv3:SentenceSentiment">
+                                <Grid 
+                                    ToolTipService.ToolTip="{Binding OriginalText}"
+                                    ColumnSpacing="12" 
+                                    RowSpacing="4" 
+                                    Padding="0 4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock 
+                                        Grid.ColumnSpan="2" 
+                                        FontWeight="Light"
+                                        TextTrimming="WordEllipsis"
+                                        TextWrapping="Wrap"
+                                        Text="{Binding OriginalText}" />
+
+                                    <TextBlock 
+                                        Grid.Row="1"
+                                        Text="Sentiment:" />
+                                    <TextBlock 
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        FontWeight="Light"
+                                        Text="{Binding Sentiment}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Grid>
+
+            <!-- Details panel-->
+            <ScrollViewer
+                Grid.Row="1"
+                Grid.Column="2">
+
+                <Grid RowSpacing="12" Padding="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
                     <TextBlock 
                         HorizontalAlignment="Center"
                         Text="Output Details"
                         FontSize="18"
                         TextDecorations="Underline" />
 
-                    <StackPanel>
+                    <StackPanel Grid.Row="1">
                         <TextBlock 
                             Text="Document Scores"
                             FontSize="18"
@@ -395,7 +422,7 @@
                                 Grid.Column="1"
                                 FontWeight="Light"
                                 Text="{Binding Sentiment}" />
-                            
+
                             <TextBlock 
                                 Grid.Row="1"
                                 Text="Positive:" />
@@ -425,7 +452,7 @@
                         </Grid>
                     </StackPanel>
 
-                    <StackPanel>
+                    <StackPanel Grid.Row="2">
                         <TextBlock 
                             Text="Sentence Metadata"
                             FontSize="18"
@@ -518,8 +545,43 @@
                                 Text="{Binding SentenceScores.NegativePercent}" />
                         </Grid>
                     </StackPanel>
-                </StackPanel>
-            </Grid>
-        </ScrollViewer>
+
+                    <Grid 
+                        Grid.Row="3"
+                        ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock 
+                            Text="Response Content"
+                            FontSize="18"
+                            TextDecorations="Underline" />
+                        <Button
+                            Grid.Column="1"
+                            ToolTipService.ToolTip="Copy to Clipboard"
+                            Command="{Binding CopyResponseContentCommand}">
+                            <SymbolIcon Symbol="Copy" />
+                        </Button>
+                        <Button
+                            Grid.Column="2"
+                            ToolTipService.ToolTip="Save sentiment.json"
+                            Command="{Binding SaveResponseContentCommand}">
+                            <SymbolIcon Symbol="Save" />
+                        </Button>
+                    </Grid>
+
+                    <TextBox 
+                        Grid.Row="4"
+                        IsReadOnly="True"
+                        TextWrapping="Wrap"
+                        Text="{Binding ResponseContent}"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        AcceptsReturn="True" />
+                </Grid>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </Page>

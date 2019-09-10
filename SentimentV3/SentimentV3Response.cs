@@ -11,5 +11,8 @@ namespace SentimentML.SentimentV3
 
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
             public RequestStatistics Statistics { get; set; }
+
+            [JsonIgnore]
+            public string ResponseContent { get; set; }
         }
 }
